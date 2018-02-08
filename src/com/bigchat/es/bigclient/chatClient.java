@@ -5,20 +5,38 @@
  */
 package com.bigchat.es.bigclient;
 
-import java.net.UnknownHostException;
 import com.bigchat.es.bigclient.gui.chatClientView;
 
 /**
- *
- * @author aorozco
+ * The class chatClient implements a Model-View-Controller design pattern for
+ * the "bigchat" application. The class creates an instance of the model, the
+ * view and puts them all together from within a controller instance.
+ * 
+ * @author aorozco bigfito@gmail.com
+ * @version 1.0
  */
 public class chatClient{
      
-    //member attributes implementing the MVC design pattern
-    private final chatClientView view;
-    private final chatClientModel model;
-    private final chatClientController controller;
+    //MEMBER ATTRIBUTES SECTION
+    
+    /**
+     * A {@link chatClientView} type of object.
+     */
+    private chatClientView view;
 
+    /**
+     * A {@link chatClientModel} type of object. 
+     */
+    private chatClientModel model;
+
+    /**
+    * A {@link chatClientController} type of object. 
+     */
+    private chatClientController controller;
+
+    /**
+     * Default constructor for chatClient class.
+     */
     public chatClient() {
         this.view = new chatClientView();
         this.model = new chatClientModel(view.getTxtChatAreaReference(), 
@@ -29,31 +47,20 @@ public class chatClient{
                                     view.getButtonSendReference(),
                                     view.getLblUserStatus(),
                                     view.getTxtChatMessageReference(),
-                                    view.getTxtUserNameReference(),
-                                    view.getTxtServerAddress(),
-                                    view.getTxtServerPort(),
-                                    view.getLblClientHostname(),
-                                    view.getLblClientIPAddress());
+                                    view.getTxtUserNameReference() );
         this.controller = new chatClientController(model, view);
     }
     
+    /**
+     * The chatClientStart method initializes all instances of the model, view
+     * and controller in order to run the client chat application.
+     */
     public void chatClientStart(){
         
-        try{
-            model.setupNetworkFields();
-            view.setVisible(true);
-            controller.triggerButtonConnect();
-            controller.triggerButtonDisconnect();
-            controller.triggerButtonSend();            
-            
-        }catch(UnknownHostException e){
-            view.getTxtNotificationAreaReference().append("[ERROR]: Problema al leer los parametros de red "
-                                                        + "del host.Revise su configuracion de red y vuelva "
-                                                        + "a intentar.\n");
-            view.getTxtNotificationAreaReference().append(e.toString());              
-        }         
-        
-    }
-    
-    
+        view.setupNetworkFields();
+        view.setVisible(true);
+        controller.triggerButtonConnect();
+        controller.triggerButtonDisconnect();
+        controller.triggerButtonSend();
+    }    
 }

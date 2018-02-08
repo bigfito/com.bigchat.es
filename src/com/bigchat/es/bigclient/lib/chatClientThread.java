@@ -8,54 +8,136 @@ package com.bigchat.es.bigclient.lib;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import javax.swing.*;
 
-import javax.swing.JTextArea;
-import javax.swing.JList;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-
-import com.bigchat.es.lib.chatUsersList;
-import com.bigchat.es.lib.chatEnvelope;
+import com.bigchat.es.lib.*;
 
 /**
- *
- * @author aorozco
+ * The class chatClientThread implements the message handling and processing 
+ * between the chat client and the chat server (vice-versa). It extends from
+ * Thread in order to create an instance of a thread object to keep reading and
+ * writing to the stream channels on an infinite loop.
+ * 
+ * @author aorozco bigfito@gmail.com
+ * @version 1.0
  */
 public class chatClientThread extends Thread {
     
-    private boolean looping;
+    //MEMBER ATTRIBUTES DEFINITION
     
+    /**
+     * A boolean switch for the infinite loop in the run method.
+     */
+    private boolean looping;
+
+    /**
+     * A socket object to reference the original chat client's socket from the
+     * model.
+     */    
     private Socket threadSocket;
+
+    /**
+     * An ObjectInputStream object to read from the chat client's socket input
+     * stream.
+     */
     private ObjectInputStream sInput;
+
+    /**
+     * An ObjectOutputStream object to write to the chat client's socket output
+     * stream.
+     */
     private ObjectOutputStream sOutput;
     
-    private int intThreadId;
-    
-    /* REFERENCE TO GUI OBJECTS */
+    /**
+     * A JTextArea object to keep a reference to the chat client's chat area field 
+     * from the GUI.
+     */
     private JTextArea txtChatAreaRef;
+
+    /**
+     * A JTextArea object to keep a reference to the chat client's notification area field 
+     * from the GUI.
+     */
     private JTextArea txtNotificationAreaRef;    
+
+    /**
+     * A JList object to keep a reference to the chat client's list of users component 
+     * from the GUI.
+     */
     private JList txtUserListRef;
-    private JButton btnConn, btnDis, btnSnd;
+
+    /**
+     * A JButton object to keep a reference to the chat client's connect button
+     * from the GUI.
+     */
+    private JButton btnConn;
+
+    /**
+     * A JButton object to keep a reference to the chat client's disconnect button
+     * from the GUI.
+     */    
+    private JButton btnDis;
+
+    /**
+     * A JButton object to keep a reference to the chat client's send button
+     * from the GUI.
+     */
+    private JButton btnSnd;
+
+    /**
+     * A JLabel object to keep a reference to the chat client's status field 
+     * from the GUI.
+     */
     private JLabel lblStat;
+
+    /**
+     * A JTextField object to keep a reference to the chat client's chat message field 
+     * from the GUI.
+     */
     private JTextField txtChatInput;
+
+    /**
+     * A JTextField object to keep a reference to the chat client's username field 
+     * from the GUI.
+     */
     private JTextField txtUsernameInput;
-    
+
+    /**
+     * A {@link chatEnvelope} type of message to exchange messages between the chat client and the
+     * chat server.
+     */    
     private chatEnvelope chatMessage;
+
+    /**
+     * A {@link chatUsersList} list of users to keep a reference to the original list of users from
+     * the model.
+     */
     private chatUsersList listOfUsers;
     
-    public chatClientThread(String name, Socket s, ObjectInputStream i, ObjectOutputStream o, 
+    /**
+     * Default constructor for the chatClientThread class.
+     * @param s A chat client's socket reference object.
+     * @param i A chat client's ObjectInputStream reference object.
+     * @param o A chat client's ObjectOutputStream reference object.
+     * @param txtTextArea1 A chat client's JTextArea reference object.
+     * @param txtTextArea2 A chat client's JTextArea reference object.
+     * @param txtUsersList A chat client's JList reference object.
+     * @param btnConn1 A chat client's JButton reference object.
+     * @param btnDis1 A chat client's JButton reference object.
+     * @param btnSnd1 A chat client's JButton reference object.
+     * @param lblStat1 A chat client's JLabel reference object.
+     * @param txtChatInput1 A chat client's JTextField reference object.
+     * @param txtUsernameInput1 A chat client's JTextField reference object.
+     */
+    public chatClientThread(Socket s, ObjectInputStream i, ObjectOutputStream o, 
                             JTextArea txtTextArea1, JTextArea txtTextArea2, JList txtUsersList,
                             JButton btnConn1, JButton btnDis1, JButton btnSnd1, JLabel lblStat1,
                             JTextField txtChatInput1, JTextField txtUsernameInput1){
         
-        this.looping = true;
-        
-        this.setName(name);
+        this.looping = true;        
         this.threadSocket = s;
         this.sInput = i;
-        this.sOutput = o;
-        
+        this.sOutput = o;        
         this.txtChatAreaRef = txtTextArea1;
         this.txtNotificationAreaRef = txtTextArea2;
         this.txtUserListRef = txtUsersList;
@@ -67,10 +149,19 @@ public class chatClientThread extends Thread {
         this.txtUsernameInput = txtUsernameInput1;
     }
     
+    /**
+     * The initiateInputStream method initializes the input stream channel associateed
+     * to the chat client's socket.
+     * @throws IOException If a problem occurs when initializing the input stream.
+     */
     public void initiateInputStream() throws IOException {
         sInput = new ObjectInputStream( threadSocket.getInputStream() );        
     }
 
+    /**
+     * The overrided run method executes the message handling and processing
+     * running on a infinite loop.
+     */
     public void run(){
                     
         try{
@@ -190,6 +281,7 @@ public class chatClientThread extends Thread {
                         break;
                 }
                 
+                //RESETS CHAT MESSAGE
                 chatMessage.resetEnvelope();
                 
             }            
@@ -208,28 +300,44 @@ public class chatClientThread extends Thread {
         
     }
     
+    /**
+     * The populateListOfUsers method populates the list of users on the chat client's
+     * GUI based on the values received from the chat server.
+     * @param listOfUsers A {@link chatUsersList} object representing the list of users.
+     */
     public void populateListOfUsers(chatUsersList listOfUsers){
-        Vector v=new Vector();        
+        
+        Vector v = new Vector();        
         this.listOfUsers = listOfUsers;
         
         if ( listOfUsers != null ){
             for ( Map.Entry me : listOfUsers.getUsersListObject().entrySet() ) {
-                v.add(listOfUsers.getUsernameFromListOfUsers( new Integer(me.getKey().toString()) ));
+                v.add( listOfUsers.getUsernameFromListOfUsers( new Integer( me.getKey().toString() ) ) );
             }
             this.txtUserListRef.setListData(v);
         }else{
-            v.add(new String(""));
+            v.add("");
             this.txtUserListRef.setListData(v);
         }                
         
     }
     
+    /**
+     * The clearListOfUsers method clears the list of users object from the
+     * GUI.
+     */
     public void clearListOfUsers(){
-        Vector v=new Vector();
-        v.add(new String(""));
+        Vector v;
+        v = new Vector();
+        v.add("");
         this.txtUserListRef.setListData(v);
     }
     
+    /**
+     * The close method closes the local input and output stream channels together
+     * with the chat client's socket.
+     * @throws IOException If a problem occurs when closing the streams.
+     */
     public void close() throws IOException{
         
         if ( sOutput != null ) sOutput.close();

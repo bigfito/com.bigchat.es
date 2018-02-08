@@ -5,11 +5,27 @@
  */
 package com.bigchat.es.bigclient.gui;
 
+import java.net.*;
+
 /**
- *
- * @author aorozco
+ * The class chatClientView implements the view for the chat client application.
+ * It displays the basic GUI which will be used by the chat users. It also retrieves
+ * the hostname and IPv4 address of the  host during start-up.
+ * 
+ * @author aorozco bigfito@gmail.com
+ * @version 1.0
  */
 public class chatClientView extends javax.swing.JFrame {
+    
+    /**
+     * A String to keep the hostname of the machine running the client.
+     */
+    String clientHostname;
+    
+    /**
+     * A String to keep the IPv4 address of the machine running the client.
+     */
+    String clientIPAddress;
 
     /**
      * Creates new form clientWindow
@@ -302,20 +318,78 @@ public class chatClientView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * The setLblHostName method sets a hostname for the hostname label on the GUI.
+     * @param strText A String representing the hostname to set up.
+     */
     public void setLblHostName(String strText) {
         this.lblHostName.setText(strText);
     }
 
+    /**
+     * The setLblIpAddress method sets an IP address for the IP address label on the GUI.
+     * @param strText A String representing the IP address to set up.
+     */
     public void setLblIpAddress(String strText) {
         this.lblIpAddress.setText(strText);
     }
     
+    /**
+     * The addTextToNotificationArea method adds text to the notification area in
+     * the GUI.
+     * @param strText A String representing the text to append.
+     */
     public void addTextToNotificationArea(String strText){
         this.txtNotificationArea.append(strText + "\n");
     }
       
+    /**
+     * The getTextFromChatMessage method returns the text that has been input into
+     * the chat message text field.
+     * @return A String representing the text from the chat message field.
+     */
     public String getTextFromChatMessage(){
         return txtChatMessage.getText();
+    }
+    
+    /**
+     * The setupNetworkFields method retrieves the hostname and IPv4 address of the
+     * machine running the chat client in order to display the values on the GUI.
+     */
+    public void setupNetworkFields(){
+        
+        InetAddress hostMachine;        
+        try{
+            
+            hostMachine = InetAddress.getLocalHost();
+            clientIPAddress = hostMachine.getHostAddress();
+            clientHostname = hostMachine.getHostName();
+
+            lblHostName.setText( clientHostname );
+            lblIpAddress.setText( clientIPAddress );
+            
+        }catch(UnknownHostException uhe){
+            txtNotificationArea.append("[ERROR]: ERROR AL OBTENER LA INFORMACION DE RED DEL HOST.\n");
+            txtNotificationArea.append( uhe.toString() + "\n" );
+        }        
+    }
+    
+    /**
+     * The getClientHostname method returns the hostname of the machine running
+     * the chat client.
+     * @return A String representing the chat client's hostname.
+     */
+    public String getClientHostname(){
+        return clientHostname;
+    }
+    
+    /**
+     * The getClientIPAddress method returns the IP address of the machine running
+     * the chat client.
+     * @return A String representing the chat client's IPv4 address.
+     */
+    public String getClientIPAddress(){
+        return clientIPAddress;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -352,54 +426,119 @@ public class chatClientView extends javax.swing.JFrame {
     private javax.swing.JList<String> txtUsersList;
     // End of variables declaration//GEN-END:variables
 
+    /**
+     * The getButtonConnectReference method returns a reference of the CONNECT button
+     * from the GUI.
+     * @return A JButton reference of the CONNECT button from the GUI.
+     */
     public javax.swing.JButton getButtonConnectReference(){
         return btnCONNECT;
     }
     
+    /**
+     * The getButtonDisconnectReference method returns a reference of the DISCONNECT button
+     * from the GUI.
+     * @return A JButton reference of the DISCONNECT button from the GUI.
+     */
     public javax.swing.JButton getButtonDisconnectReference(){
         return btnDISCONNECT;
     }
     
+    /**
+     * The getButtonSendReference method returns a reference of the SEND button
+     * from the GUI.
+     * @return A JButton reference of the SEND button from the GUI.
+     */
     public javax.swing.JButton getButtonSendReference(){
         return btnSEND;
     }
     
+    /**
+     * The getTxtServerAddress method returns a reference of the server address
+     * text field from the GUI.
+     * @return A JTextField reference of the IPv4 server address text field from the GUI.
+     */
     public javax.swing.JTextField getTxtServerAddress(){
         return txtServerAddress;
-    }
+    }    
     
-    public javax.swing.JSpinner getTxtServerPort(){
-        return txtServerPort;
-    }
-    
+    /**
+     * The getTxtUserNameReference method returns a reference of the username
+     * text field from the GUI.
+     * @return A JTextField reference of the username text field from the GUI.
+     */
     public javax.swing.JTextField getTxtUserNameReference(){
         return txtUserName;
     }
 
+    /**
+     * The getTxtChatMessageReference method returns a reference of the chat message
+     * text field from the GUI.
+     * @return A JTextField reference of the chat message text field from the GUI.
+     */
     public javax.swing.JTextField getTxtChatMessageReference(){
         return txtChatMessage;
     }
+
+    /**
+     * The getTxtServerPort method returns a reference of the server port field
+     * from the GUI.
+     * @return A JSpinner reference of the server port field from the GUI.
+     */
+    public javax.swing.JSpinner getTxtServerPort(){
+        return txtServerPort;
+    }
     
+    /**
+     * The getTxtChatAreaReference method returns a reference of the chat area field
+     * from the GUI.
+     * @return A JTextArea reference of the chat area field from the GUI.
+     */
     public javax.swing.JTextArea getTxtChatAreaReference(){
         return txtChatArea;
     }
     
+    /**
+     * The getTxtNotificationAreaReference method returns a reference of the chat
+     * notification area field from the GUI.
+     * @return A JTextArea reference of the chat notificaation area field from the GUI.
+     */
     public javax.swing.JTextArea getTxtNotificationAreaReference(){
         return txtNotificationArea;
     }
     
+    /**
+     * The getTxtUsersListReference method returns a reference of the list of users
+     * component from the GUI.
+     * @return A JList reference of the list of users field from the GUI.
+     */
     public javax.swing.JList<String> getTxtUsersListReference(){
         return txtUsersList;
     }    
     
+    /**
+     * The getLblUserStatus method returns a reference of the client's status
+     * label from the GUI.
+     * @return A JLabel reference of the client's status field from the GUI.
+     */
     public javax.swing.JLabel getLblUserStatus(){
         return lblUserStatus;
     }
     
+    /**
+     * The getLblClientHostname method returns a reference of the client's hostname
+     * label from the GUI.
+     * @return A JLabel reference of the client's hostname label field from the GUI.
+     */
     public javax.swing.JLabel getLblClientHostname(){
         return lblHostName;
     }
     
+    /**
+     * The getLblClientIPAddress method returns a reference of the client's IPv4
+     * address label from the GUI.
+     * @return A JLabel reference of the client's IPv4 label field from the GUI.
+     */
     public javax.swing.JLabel getLblClientIPAddress(){
         return lblIpAddress;
     }    
