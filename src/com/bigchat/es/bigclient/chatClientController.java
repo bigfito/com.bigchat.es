@@ -14,33 +14,70 @@ import java.net.*;
 import com.bigchat.es.bigclient.gui.chatClientView;
 
 /**
- *
- * @author aorozco
+ * The class chatClientController implements a controller application listening
+ * for user actions to be triggered. It receives a reference of the view and model
+ * clases.
+ * 
+ * @author aorozco bigfito@gmail.com
+ * @version 1.0
  */
 public class chatClientController {
     
-    private final chatClientModel model;
-    private final chatClientView view;
+    //MEMBER ATTRIBUTES SECTION
+
+    /** 
+     * A {@link chatClientModel} object reference.
+     */    
+    private chatClientModel model;
+
+    /** 
+     * A {@link chatClientView} object reference.
+     */
+    private chatClientView view;
     
+    /** 
+     * An action listener for the CONNECT button.
+     */
     private ActionListener actionListenerConnect;
+
+    /** 
+     * An action listener for the DISCONNECT button.
+     */
     private ActionListener actionListenerDisconnect;
+
+    /** 
+     * An action listener for the SEND button.
+     */
     private ActionListener actionListenerSend;
-    
+
+    /** 
+     * A String for storing temporary messages.
+     */    
     private String strAnnounce;
 
+    /**
+     * Default constructor for the chatClientController class.
+     * @param model A {@link chatClientModel} reference of the model.
+     * @param view A {@link chatClientView} reference of the view.
+     */
     public chatClientController(chatClientModel model, chatClientView view) {
         this.model = model;
         this.view = view;
-        this.view.setLblHostName( model.getStrHostName() );
-        this.view.setLblIpAddress( model.getStrIpAddress() );
         this.view.addTextToNotificationArea("BIENVENIDO...");
         this.strAnnounce = "";
     }
     
+    /**
+     * The cleanStrAnnounce method clears the content of the strAnnounce String variable.
+     */
     public void cleanStrAnnounce(){
         strAnnounce = "";
     }    
    
+    /**
+     * The triggerButtonConnect method is called when the user hits the CONNECT button
+     * in order to connect to the chat server.
+     */
     public void triggerButtonConnect(){
         actionListenerConnect = new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
@@ -52,7 +89,7 @@ public class chatClientController {
                 if ( model.serverIPAddressIsValid( view.getTxtServerAddress().getText() ) ){
                     
                     /* RETRIEVE USERNAME */
-                    model.setStrUserName(view.getTxtUserNameReference().getText());
+                    model.setStrUserName( view.getTxtUserNameReference().getText() );
                     view.getTxtUserNameReference().setText( model.getStrUserName() );
 
                     if ( model.isUsernameValid() ){
@@ -60,8 +97,8 @@ public class chatClientController {
                         view.getTxtUserNameReference().setEditable(false);
 
                         strAnnounce =  "[INFO]: USUARIO (" + model.getStrUserName() + ") ";
-                        strAnnounce += "CONECTANDO DESDE LA MAQUINA (" + model.getStrHostName() + ") ";
-                        strAnnounce += "CON IP (" + model.getStrIpAddress() + ").";
+                        strAnnounce += "CONECTANDO DESDE LA MAQUINA (" + view.getClientHostname() + ") ";
+                        strAnnounce += "CON IP (" + view.getClientIPAddress() + ").";
                         view.addTextToNotificationArea(strAnnounce);
                         cleanStrAnnounce();
 
@@ -73,6 +110,10 @@ public class chatClientController {
                         model.prepareConnectionEnvelope();
 
                         try{
+                            //SET CHAT SERVER IPv4 & PORT
+                            model.setChatServerIPAddress( view.getTxtServerAddress().getText() );
+                            model.setChatServerPort( Integer.parseInt( view.getTxtServerPort().getValue().toString() ) );
+                            
                             /* CONNECT TO SERVER */
                             model.connectToServer();
 
@@ -111,7 +152,10 @@ public class chatClientController {
         view.getButtonConnectReference().addActionListener(actionListenerConnect);
     }
     
-    
+    /**
+     * The triggerButtonDisconnect method is called when the user hits the DISCONNECT
+     * butto in order to disconnect from the chat server.
+     */
     public void triggerButtonDisconnect(){        
         actionListenerDisconnect = new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
@@ -148,6 +192,9 @@ public class chatClientController {
         view.getButtonDisconnectReference().addActionListener(actionListenerDisconnect);
     }
     
+    /**
+     * The triggerButtonSend method is called when the user hits the SEND button.
+     */
     public void triggerButtonSend(){        
         
         actionListenerSend = new ActionListener() {
@@ -156,7 +203,7 @@ public class chatClientController {
                 try{
                     
                     /* PREPARE CHAT MESSAGE */
-                    model.prepareChatMessageEnvelope(view.getTextFromChatMessage());
+                    model.prepareChatMessageEnvelope( view.getTextFromChatMessage() );
                     model.sendEnvelopeMessageToServer();                                                           
                     
                     /* DISABLE CHAT TEXT MESSAGE AND SEND BUTTON */

@@ -15,6 +15,7 @@ import com.bigchat.es.bigserver.lib.chatServerNetworkInterfaces;
  * The class chatServerController implements a controller application listening
  * for user actions to be triggered. It receives a reference of the view and model
  * clases.
+ * 
  * @author aorozco bigfito@gmail.com
  * @version 1.0
  */

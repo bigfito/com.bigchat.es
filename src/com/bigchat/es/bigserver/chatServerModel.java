@@ -299,7 +299,7 @@ public class chatServerModel{
                 try{
                     
                     //UPDATE MESSAGE TO CHAT SERVER NOTIFICATION AREA
-                    writeToNotificationArea("WAITING FOR INCOMING CLIENTS TO CONNECT....\n");
+                    writeToNotificationArea("WAITING FOR INCOMING CLIENTS TO CONNECT....\n\n");
                                     
                     //WAITING FOR INCOMING CLIENTS TO CONNECT
                     incomingClientSocket = ss.accept();

@@ -14,6 +14,7 @@ import com.bigchat.es.bigserver.gui.chatServerView;
  * The class chatServer implements a Model-View-Controller design pattern for
  * the "bigchat" application. The class creates an instance of the model, the
  * view and puts them all together from within a controller instance.
+ * 
  * @author aorozco bigfito@gmail.com
  * @version 1.0
  */

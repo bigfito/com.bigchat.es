@@ -155,16 +155,16 @@ public class chatServerClientThread extends Thread {
                 
                 switch ( chatMessageS.getEnvHeader() ){                    
                     
-                    case chatEnvelope.CONNECT_MSG:
-                        
-                        //CONNECTING MESSAGE
-                        writeToNotificationArea("USER " + chatMessageS.getEnvFrom() + " WANTS TO CONNECT.\n");                        
+                    case chatEnvelope.CONNECT_MSG:                        
                         
                         //CHECK IF USERNAME IS NOT ALREADY IN USE
                         if ( !chatUsersListServerThread.usernameInUserslist(envelopeSender) ){
-                        
+
+                            //CONNECTING MESSAGE
+                            writeToNotificationArea("USER " + chatMessageS.getEnvFrom() + " WANTS TO CONNECT.\n");
+                            
                             //ACK TO CLIENT
-                            chatMessageS.setEnvHeader(10);
+                            chatMessageS.setEnvHeader( chatEnvelope.CONNECT_MSG_ACK );
                             chatMessageS.setEnvFrom("SERVER");
                             chatMessageS.setEnvBody("ACK");
                             serverOutput.writeObject(chatMessageS);
@@ -178,7 +178,7 @@ public class chatServerClientThread extends Thread {
                             updateLabelConnections();
 
                             //BROADCAST UPDATED LIST OF USERS TO ALL CONNECTED CLIENTS
-                            chatMessageS.setEnvHeader(6);
+                            chatMessageS.setEnvHeader( chatEnvelope.UPDTLISTOFUSERS_MSG );
                             chatMessageS.setEnvFrom("SERVER");
                             chatMessageS.setEnvBody("USERSLIST");                        
                             chatMessageS.setEnvList(chatUsersListServerThread);
@@ -187,7 +187,7 @@ public class chatServerClientThread extends Thread {
                             //IF ONLY ONE USER CONNECTED SEND WAIT MESSAGE
                             if ( chatUsersListServerThread.getListOfUsersSize() == 1 ){                                
 
-                                chatMessageS.setEnvHeader(5);
+                                chatMessageS.setEnvHeader( chatEnvelope.HOMEALONE_MSG );
                                 chatMessageS.setEnvFrom("SERVER");
                                 chatMessageS.setEnvBody("WAIT");
                                 serverOutput.writeObject(chatMessageS);
@@ -199,21 +199,39 @@ public class chatServerClientThread extends Thread {
                             writeToNotificationArea("USER " + envelopeSender + " IS READY TO CHAT.\n");
 
                             //SEND BROADCAST ANNOUNCING CLIENT HAS JOINED THE CHAT
-                            chatMessageS.setEnvHeader(7);
+                            chatMessageS.setEnvHeader( chatEnvelope.JOINING_MSG );
                             chatMessageS.setEnvFrom("SERVER");
                             chatMessageS.setEnvBody(envelopeSender);
                             cserverBroadcasterThread.broadcastMessage(chatMessageS);
                         
                         }else{                            
                                 
+                            //STOP LOOPING
+                            looping = false;
+                            
+                            //DUPLICATED MESSAGE
+                            writeToNotificationArea("USER " + chatMessageS.getEnvFrom() + " IS DUPLICATED.\n");
+                            
                             //NACK TO CLIENT USERNAME IN USE
-                            chatMessageS.setEnvHeader(100);
+                            chatMessageS.setEnvHeader( chatEnvelope.CONNECT_MSG_NACK );
                             chatMessageS.setEnvFrom("SERVER");
                             chatMessageS.setEnvBody("NACK");
                             serverOutput.writeObject(chatMessageS);
                             serverOutput.flush();
-                            serverOutput.reset();                            
-                                
+                            serverOutput.reset();
+
+                            //UPDATE NUMBER OF CONNECTED CLIENTS IN SERVER GUI
+                            updateLabelConnections();
+                            
+                            //REMOVE REFERENCE TO THREAD OUTPUTSTREAM FROM BROADCAST LIST
+                            cserverBroadcasterThread.removeObjectOutputStreamFromBroadcastList( (int)this.getId() );
+
+                            //CLOSE STREAMS
+                            finalizeThreadCommunication();
+                            
+                            //REMOVE THE REFERENCE OF THE INCOMING CLIENT SOCKET FROM THE VAULT
+                            csClientsocketKeeperThread.removeClientsocketFromVault( (int)this.getId() );                       
+
                         }
                         
                         break;
@@ -224,7 +242,7 @@ public class chatServerClientThread extends Thread {
                         writeToNotificationArea("USER " + envelopeSender + " WANTS TO DISCONNECT.\n");                        
                         
                         //SEND DISCONNECT ACK BACK TO CLIENT
-                        chatMessageS.setEnvHeader(20);
+                        chatMessageS.setEnvHeader( chatEnvelope.DISCONNECT_MSG_ACK );
                         chatMessageS.setEnvFrom("SERVER");
                         chatMessageS.setEnvBody("ACK");
                         serverOutput.writeObject(chatMessageS);
@@ -235,10 +253,10 @@ public class chatServerClientThread extends Thread {
                         chatUsersListServerThread.removeUserFromListOfUsers( (int)this.getId() );
 
                         //REMOVE REFERENCE TO THREAD OUTPUTSTREAM FROM BROADCAST LIST
-                        cserverBroadcasterThread.removeObjectOutputStreamFromBroadcastList( (int)this.getId() );                       
+                        cserverBroadcasterThread.removeObjectOutputStreamFromBroadcastList( (int)this.getId() );
                         
                         //BROADCAST UPDATED LIST OF USERS TO ALL CONNECTED CLIENTS (IF ANY)
-                        chatMessageS.setEnvHeader(6);
+                        chatMessageS.setEnvHeader( chatEnvelope.UPDTLISTOFUSERS_MSG );
                         chatMessageS.setEnvFrom("SERVER");
                         chatMessageS.setEnvBody("USERSLIST");                        
                         chatMessageS.setEnvList(chatUsersListServerThread);
@@ -246,7 +264,7 @@ public class chatServerClientThread extends Thread {
 
                         //SEND BROADCAST ANNOUNCING CLIENT HAS ABANDONED THE CHAT
                         //BROADCAST UPDATED LIST OF USERS TO REMAINING CLIENTS (IF ANY)
-                        chatMessageS.setEnvHeader(9);
+                        chatMessageS.setEnvHeader( chatEnvelope.ABANDON_MSG );
                         chatMessageS.setEnvFrom("SERVER");
                         chatMessageS.setEnvBody(envelopeSender);
                         cserverBroadcasterThread.broadcastMessage(chatMessageS); 
@@ -258,7 +276,7 @@ public class chatServerClientThread extends Thread {
                         finalizeThreadCommunication();
                         
                         //REMOVE THE REFERENCE OF THE INCOMING CLIENT SOCKET FROM THE VAULT
-                        csClientsocketKeeperThread.removeClientsocketFromVault( (int)this.getId() );                        
+                        csClientsocketKeeperThread.removeClientsocketFromVault( (int)this.getId() );
                         
                         //UPDATAE MESSAGE ON SERVER NOTIFICATION AREA
                         writeToNotificationArea("USER " + envelopeSender + " DISCONNECTED WITH SUCCESS.\n");
@@ -270,7 +288,7 @@ public class chatServerClientThread extends Thread {
                     case chatEnvelope.CHAT_MSG:
                         
                         //CHAT MESSAGE FROM CLIENT USER (SEND TO ALL CONNECTED USERS )                        
-                        chatMessageS.setEnvHeader(3);
+                        chatMessageS.setEnvHeader( chatEnvelope.CHAT_MSG );
                         chatMessageS.setEnvFrom(envelopeSender);
                         cserverBroadcasterThread.broadcastMessage(chatMessageS);                        
                         break;
